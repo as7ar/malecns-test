@@ -1,30 +1,61 @@
-import os
-
 from dotenv import load_dotenv
-from neuprint import Client, fetch_neurons, fetch_adjacencies
-
+from neuprint import Client, fetch_adjacencies
+import os
+import malecns
 
 load_dotenv()
-
-token = os.getenv("TOKEN")
 
 client = Client(
     "https://neuprint.janelia.org",
     dataset="male-cns:v1.0",
-    token=token,
+    token=os.getenv("TOKEN"),
 )
 
-neurons, synapses = fetch_neurons("DNge104")
+neuron_info, connections = fetch_adjacencies(
+    "DNge104",
+    None,
+    omit_rois=True,
+)
 
-print(neurons)
-print(synapses)
+neuron_ids = set()
 
-outgoing, neuron_info = fetch_adjacencies("DNge104")
+for _, row in connections.iterrows():
+    neuron_ids.add(int(row["bodyId_pre"]))
+    neuron_ids.add(int(row["bodyId_post"]))
 
-print("Outgoing:")
-print(outgoing)
+neuron_ids = list(neuron_ids)
 
-incoming, neuron_info = fetch_adjacencies(None, "DNge104")
+id_to_index = {
+    neuron_id: index
+    for index, neuron_id in enumerate(neuron_ids)
+}
 
-print("Incoming:")
-print(incoming)
+rust_connections = []
+
+for _, row in connections.iterrows():
+    from_id = int(row["bodyId_pre"])
+    to_id = int(row["bodyId_post"])
+    weight = float(row["weight"])
+
+    rust_connections.append((
+        id_to_index[from_id],
+        id_to_index[to_id],
+        weight,
+    ))
+
+network = malecns.PyNetwork(len(neuron_ids))
+
+network.add_connections(rust_connections)
+
+print("Neurons:", len(neuron_ids))
+print("Connections:", len(rust_connections))
+
+network.set_input(0, 1.0)
+
+for i in range(10):
+    network.step()
+
+    print(
+        f"Step {i}:",
+        network.get_potential(0),
+    )
