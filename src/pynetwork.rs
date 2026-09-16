@@ -17,7 +17,7 @@ impl PyNetwork {
         self.network.connect(from, to, weight)
     }
 
-    fn add_connections(&mut self, connections: Vec<usize, usize, f32>) {
+    fn add_connections(&mut self, connections: Vec<(usize, usize, f32)>) {
         for (from, to, weight) in connections {
             self.network.connect(from, to, weight);
         }
