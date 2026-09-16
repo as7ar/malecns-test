@@ -1,3 +1,7 @@
+mod pynetwork;
+
+use pynetwork::*;
+
 struct Neuron {
     potential: f32,
     threshold: f32,
@@ -84,19 +88,18 @@ mod test {
     fn main() {
         let mut network = Network::new(2);
 
-    network.connect(0, 1, 0.6);
-    network.set_input(0, 1.0);
+        network.connect(0, 1, 0.6);
 
-    for i in 0..5 {
-        let spikes = network.step();
+        for step in 0..20 {
+            network.set_input(0, 0.4);
 
-        println!(
-            "step={}, spikes={:?}, neuron0={}, neuron1={}",
-            i,
-            spikes,
-            network.neurons[0].potential,
-            network.neurons[1].potential,
-        );
-    }
+            let spikes = network.step();
+
+            println!(
+                "step={step}, spikes={spikes:?}, neuron0={}, neuron1={}",
+                network.neurons[0].potential,
+                network.neurons[1].potential,
+            );
+        }
     }
 }
