@@ -43,19 +43,19 @@ for _, row in connections.iterrows():
         weight,
     ))
 
-network = malecns.PyNetwork(len(neuron_ids))
+# network = malecns.PyNetwork(len(neuron_ids))
 
-network.add_connections(rust_connections)
+# network.add_connections(rust_connections)
 
-print("Neurons:", len(neuron_ids))
-print("Connections:", len(rust_connections))
+# print("Neurons:", len(neuron_ids))
+# print("Connections:", len(rust_connections))
 
-network.set_input(0, 1.0)
+# network.set_input(0, 1.0)
 
-for i in range(10):
-    network.step()
+# for i in range(10):
+#     network.step()
 
-    print(
-        f"Step {i}:",
-        network.get_potential(0),
-    )
+#     print(
+#         f"Step {i}:",
+#         network.get_potential(0),
+#     )
