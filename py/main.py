@@ -39,7 +39,7 @@ row = connections.iloc[0]
 
 from_id = int(row["bodyId_pre"])
 to_id = int(row["bodyId_post"])
-weight = float(row["weight"])
+weight = float(row["weight"]) / 100.0
 
 from_index = id_to_index[from_id]
 to_index = id_to_index[to_id]
@@ -49,7 +49,7 @@ rust_connections = []
 for _, row in connections.iterrows():
     from_id = int(row["bodyId_pre"])
     to_id = int(row["bodyId_post"])
-    weight = float(row["weight"])
+    weight = float(row["weight"]) / 100.0
 
     from_index = id_to_index[from_id]
     to_index = id_to_index[to_id]
