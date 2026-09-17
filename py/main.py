@@ -1,9 +1,10 @@
 import os
 
 from dotenv import load_dotenv
-from neuprint import Client, fetch_neurons, fetch_adjacencies
+from neuprint import Client, fetch_adjacencies
 
 import malecns
+
 
 load_dotenv()
 
@@ -13,12 +14,13 @@ client = Client(
     token=os.getenv("TOKEN"),
 )
 
-neurons, roi_counts = fetch_neurons("DNge104")
-neurons, connections = fetch_adjacencies(
+
+_, connections = fetch_adjacencies(
     "DNge104",
     None,
     omit_rois=True,
 )
+
 
 neuron_ids = set()
 
@@ -26,23 +28,13 @@ for _, row in connections.iterrows():
     neuron_ids.add(int(row["bodyId_pre"]))
     neuron_ids.add(int(row["bodyId_post"]))
 
-print("Neuron count:", len(neuron_ids))
-
 neuron_ids = list(neuron_ids)
 
 id_to_index = {
-    neuron_id: index
-    for index, neuron_id in enumerate(neuron_ids)
+    body_id: index
+    for index, body_id in enumerate(neuron_ids)
 }
 
-row = connections.iloc[0]
-
-from_id = int(row["bodyId_pre"])
-to_id = int(row["bodyId_post"])
-weight = float(row["weight"]) / 100.0
-
-from_index = id_to_index[from_id]
-to_index = id_to_index[to_id]
 
 rust_connections = []
 
@@ -51,40 +43,42 @@ for _, row in connections.iterrows():
     to_id = int(row["bodyId_post"])
     weight = float(row["weight"]) / 100.0
 
-    from_index = id_to_index[from_id]
-    to_index = id_to_index[to_id]
-
     rust_connections.append(
-        (from_index, to_index, weight)
+        (
+            id_to_index[from_id],
+            id_to_index[to_id],
+            weight,
+        )
     )
 
-print("Connections(", len(rust_connections),")")
 
-network = malecns.PyNetwork(len(neuron_ids))
-
+network = malecns.PyNetwork(neuron_ids)
 network.add_connections(rust_connections)
 
-print("neurons:", len(neuron_ids))
-print("connections:", len(rust_connections))
 
-# network.set_input(0, 1.0)
+print(f"Neurons: {len(neuron_ids)}")
+print(f"Connections: {len(rust_connections)}")
 
-# for step in range(10):
-#     spikes = network.step()
 
-#     print(
-#         f"step={step}, "
-#         f"spike_count={len(spikes)}, "
-#         f"spikes={spikes[:10]}"
-#     )
+dnge104_index = id_to_index[12781]
 
-INPUT_NEURON = 0
-OUTPUT_NEURON = 2
+print()
+print("SNN simulation:")
 
-for step in range(20):
-    network.set_input(INPUT_NEURON, 0.1)
+for step in range(100):
+    network.set_input(dnge104_index, 0.11)
 
     spikes = network.step()
 
-    if OUTPUT_NEURON in spikes:
-        print(f"step={step}: OUTPUT SPIKE")
+    if not spikes:
+        continue
+
+    spike_body_ids = [
+        neuron_ids[index]
+        for index in spikes
+    ]
+
+    print(
+        f"step={step}, "
+        f"spikes={spike_body_ids}"
+    )

@@ -9,8 +9,8 @@ struct PyNetwork {
 #[pymethods]
 impl PyNetwork {
     #[new]
-    fn new(count: usize) -> Self {
-        Self { network: Network::new(count) }
+    fn new(body_ids: Vec<u64>) -> Self {
+        Self { network: Network::new(body_ids) }
     }
 
     fn connect(&mut self, from: usize, to: usize, weight: f32) {

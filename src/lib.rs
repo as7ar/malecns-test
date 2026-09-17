@@ -1,16 +1,17 @@
 mod pynetwork;
 
-use pynetwork::*;
 
 struct Neuron {
+    body_id: u64,
     potential: f32,
     threshold: f32,
     leak: f32,
 }
 
 impl Neuron {
-    fn new() -> Self {
+    fn new(body_id: u64) -> Self {
         Self {
+            body_id,
             potential: 0.0,
             threshold: 1.0,
             leak: 0.9,
@@ -42,9 +43,11 @@ struct Network {
 }
 
 impl Network {
-    fn new(count: usize) -> Self {
+    fn new(body_ids: Vec<u64>) -> Self {
+        let count = body_ids.len();
+
         Self {
-            neurons: (0..count).map(|_| Neuron::new()).collect(),
+            neurons: body_ids.into_iter().map(Neuron::new).collect(),
             connections: (0..count).map(|_| Vec::new()).collect(),
             inputs: vec![0.0; count],
         }
