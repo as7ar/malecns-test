@@ -67,13 +67,24 @@ network.add_connections(rust_connections)
 print("neurons:", len(neuron_ids))
 print("connections:", len(rust_connections))
 
-network.set_input(0, 1.0)
+# network.set_input(0, 1.0)
 
-for step in range(10):
+# for step in range(10):
+#     spikes = network.step()
+
+#     print(
+#         f"step={step}, "
+#         f"spike_count={len(spikes)}, "
+#         f"spikes={spikes[:10]}"
+#     )
+
+INPUT_NEURON = 0
+OUTPUT_NEURON = 2
+
+for step in range(20):
+    network.set_input(INPUT_NEURON, 0.1)
+
     spikes = network.step()
 
-    print(
-        f"step={step}, "
-        f"spike_count={len(spikes)}, "
-        f"spikes={spikes[:10]}"
-    )
+    if OUTPUT_NEURON in spikes:
+        print(f"step={step}: OUTPUT SPIKE")
