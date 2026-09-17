@@ -3,7 +3,7 @@ use crate::*;
 
 #[pyclass]
 struct PyNetwork {
-    network: Netwrok,
+    network: Network,
 }
 
 #[pymethods]
